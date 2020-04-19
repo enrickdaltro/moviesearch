@@ -3,8 +3,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 
 import Router from './routes';
-
-// import { Container } from './styles';
+import './config/ReactotronConfig';
 
 export default function src() {
   return (

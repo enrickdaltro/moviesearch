@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 
@@ -9,7 +9,10 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
+  Image,
 } from 'react-native';
+
+import api from '../../services/api';
 
 // Setting number of columns that Flatlist will have
 const numColumns = 2;
@@ -50,18 +53,27 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#eee',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 200,
+    height: 280,
     flex: 1,
-    marginHorizontal: 10,
-    marginVertical: 10,
-    borderRadius: 4,
+    shadowColor: '#999',
+    shadowOpacity: 0.3,
+    shadowOffset: {
+      height: 5,
+      width: 4,
+    },
+    shadowRadius: 4,
+    elevation: 1,
   },
 
-  cardText: {
-    fontSize: 50,
+  cardImage: {
+    flex: 1,
+    width: '90%',
+    resizeMode: 'contain',
+    marginHorizontal: 10,
+    marginVertical: 10,
+    borderRadius: 10,
   },
 });
 
@@ -72,33 +84,16 @@ const styles = StyleSheet.create({
 const flatlistLayout = [
   {
     width: 170,
-    height: 220,
+    height: 280,
     marginVertical: 10,
     marginHorizontal: 10,
   },
   {
     width: 170,
-    height: 220,
+    height: 280,
     marginVertical: 10,
     marginHorizontal: 10,
   },
-];
-
-/**
- * Setting initial data
- */
-
-const data = [
-  { key: '1' },
-  { key: '2' },
-  { key: '3' },
-  { key: '4' },
-  { key: '5' },
-  { key: '6' },
-  { key: '7' },
-  { key: '8' },
-  { key: '9' },
-  { key: '10' },
 ];
 
 /**
@@ -107,12 +102,32 @@ const data = [
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
+  const [movies, setMovies] = useState(false);
+
+  /**
+   * Setting initial data
+   */
+
+  useEffect(() => {
+    async function loadMovies() {
+      setLoading(true);
+      const response = await api.get(
+        'movie/popular?api_key=20d57af72e0527307662f7b20543ca1e&language=en-US&page=1',
+      );
+      setTimeout(() => {
+        setMovies(response.data.results);
+        setLoading(false);
+      }, 1800);
+    }
+    loadMovies();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
           <Icon name="dehaze" size={24} color="#1b0241" />
-          <Text style={styles.headerTitle}>All Items</Text>
+          <Text style={styles.headerTitle}>Popular Movies</Text>
           <Icon name="search" size={24} color="#1b0241" />
         </View>
       </View>
@@ -130,13 +145,18 @@ export default function Home() {
         layout={flatlistLayout}>
         <FlatList
           style={styles.list}
-          data={data}
+          data={movies}
           showsVerticalScrollIndicator={false}
-          keyExtractor={item => String(item.key)}
+          keyExtractor={item => String(item.id)}
           numColumns={numColumns}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.card}>
-              <Text style={styles.cardText}>{item.key}</Text>
+              <Image
+                source={{
+                  uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                }}
+                style={styles.cardImage}
+              />
             </TouchableOpacity>
           )}
         />
