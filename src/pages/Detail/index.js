@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 
 import {
   StyleSheet,
@@ -28,7 +29,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
   },
 
   headerTitle: {
@@ -41,13 +41,6 @@ const styles = StyleSheet.create({
   genres: {
     flexDirection: 'row',
     marginBottom: 10,
-  },
-
-  genre: {
-    color: '#DE4424',
-    fontWeight: 'bold',
-    fontSize: 12,
-    marginRight: 5,
   },
 
   tagline: {
@@ -90,20 +83,48 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Setting Skeleton Layout
+ */
+
+const detailSkeleton = [
+  {
+    width: 350,
+    height: 40,
+    marginBottom: 10,
+  },
+  {
+    width: 350,
+    height: 200,
+    marginBottom: 10,
+  },
+  {
+    width: 350,
+    height: 300,
+    marginBottom: 10,
+  },
+];
+
 export default function Detail({ route, navigation }) {
   // getting movie id to api call
   const { id } = route.params.item;
 
   // State
+  const [loading, setLoading] = useState(false);
+
   const [movie, setMovie] = useState([]);
 
   useEffect(() => {
     async function loadMovieDetails() {
+      setLoading(true);
       const response = await api.get(
         `/movie/${id}?api_key=20d57af72e0527307662f7b20543ca1e`,
       );
-      setMovie(response.data);
-      console.tron.log(response.data);
+
+      setTimeout(() => {
+        setMovie(response.data);
+        setLoading(false);
+      }, 1800);
     }
     loadMovieDetails();
   }, [id]);
@@ -118,45 +139,49 @@ export default function Detail({ route, navigation }) {
           <Text style={styles.headerTitle}>{movie.original_title}</Text>
           <Icon name="search" size={26} color="#FFF" />
         </View>
-
-        <View>
-          <View style={styles.genres}>
-            {movie !== undefined
-              ? movie.genres.map(genre => (
-                  <Text style={styles.genre}>{genre.name}</Text>
-                ))
-              : 'Title'}
-          </View>
-          <Text style={styles.tagline}>
-            {movie.tagline ? movie.tagline : movie.original_title}
-          </Text>
-          <Text style={styles.date}>Released at {movie.release_date}</Text>
-        </View>
-
-        <View>
-          <Image
-            style={styles.cover}
-            source={{
-              uri: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
-            }}
-          />
-        </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          <Text style={styles.rating}>
-            <Icon name="star" size={22} color="#feb221" />
-            {movie.vote_average}/10
-          </Text>
-        </View>
-
-        <Text style={styles.vote}>{movie.vote_count} votes on IMDb</Text>
-
-        <Text style={styles.overview}>{movie.overview}</Text>
       </View>
+
+      <SkeletonContent
+        containerStyle={{
+          flex: 1,
+          alignItems: 'center',
+        }}
+        isLoading={loading}
+        animationDirection="horizontalLeft"
+        layout={detailSkeleton}>
+        <View style={{ marginHorizontal: 20 }}>
+          <View>
+            <Text style={styles.tagline}>
+              {movie.tagline ? movie.tagline : movie.original_title}
+            </Text>
+            <Text style={styles.date}>Released at {movie.release_date}</Text>
+          </View>
+
+          <View>
+            <Image
+              style={styles.cover}
+              source={{
+                uri: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+              }}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Text style={styles.rating}>
+              <Icon name="star" size={22} color="#feb221" />
+              {movie.vote_average}/10
+            </Text>
+          </View>
+
+          <Text style={styles.vote}>{movie.vote_count} votes on IMDb</Text>
+
+          <Text style={styles.overview}>{movie.overview}</Text>
+        </View>
+      </SkeletonContent>
     </SafeAreaView>
   );
 }
