@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import SkeletonContent from 'react-native-skeleton-content-nonexpo';
+
 import {
   StyleSheet,
   View,
@@ -64,6 +66,25 @@ const styles = StyleSheet.create({
 });
 
 /**
+ * Setting Skeleton Layout
+ */
+
+const flatlistLayout = [
+  {
+    width: 170,
+    height: 220,
+    marginVertical: 10,
+    marginHorizontal: 10,
+  },
+  {
+    width: 170,
+    height: 220,
+    marginVertical: 10,
+    marginHorizontal: 10,
+  },
+];
+
+/**
  * Setting initial data
  */
 
@@ -85,6 +106,7 @@ const data = [
  */
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -95,18 +117,30 @@ export default function Home() {
         </View>
       </View>
 
-      <FlatList
-        style={styles.list}
-        data={data}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={item => String(item.key)}
-        numColumns={numColumns}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
-            <Text style={styles.cardText}>{item.key}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <SkeletonContent
+        containerStyle={{
+          flex: 1,
+
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+        }}
+        isLoading={loading}
+        animationDirection="horizontalLeft"
+        layout={flatlistLayout}>
+        <FlatList
+          style={styles.list}
+          data={data}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={item => String(item.key)}
+          numColumns={numColumns}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.card}>
+              <Text style={styles.cardText}>{item.key}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </SkeletonContent>
     </SafeAreaView>
   );
 }
