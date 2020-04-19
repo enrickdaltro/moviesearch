@@ -40,6 +40,7 @@ const homeStack = () => {
           headerTransparent: true,
           headerTitle: null,
           headerBackTitleVisible: false,
+          headerLeft: null,
         }}
       />
     </Stack.Navigator>

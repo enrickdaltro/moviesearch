@@ -100,7 +100,7 @@ const flatlistLayout = [
  * Rendered Screen
  */
 
-export default function Home() {
+export default function Home({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [movies, setMovies] = useState(false);
 
@@ -150,7 +150,9 @@ export default function Home() {
           keyExtractor={item => String(item.id)}
           numColumns={numColumns}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate('Detail', { item })}>
               <Image
                 source={{
                   uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
