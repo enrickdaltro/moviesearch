@@ -100,7 +100,7 @@ export default function Home({ navigation }) {
             { opacity: OpacityHeaderY },
           ]}>
           <Icon name="dehaze" size={24} color="#1b0241" />
-          <Text style={styles.headerTitle}>Popular Movies</Text>
+          <Text style={styles.headerTitle}>Search Movies</Text>
           <Icon name="search" size={24} color="#1b0241" />
         </Animated.View>
       </View>
