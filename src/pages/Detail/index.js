@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  Animated,
 } from 'react-native';
 
 import api from '../../services/api';
@@ -111,8 +112,10 @@ export default function Detail({ route, navigation }) {
 
   // State
   const [loading, setLoading] = useState(false);
-
   const [movie, setMovie] = useState([]);
+
+  // Animation State
+  const [opacityScreen] = useState(new Animated.Value(0));
 
   useEffect(() => {
     async function loadMovieDetails() {
@@ -124,32 +127,51 @@ export default function Detail({ route, navigation }) {
       setTimeout(() => {
         setMovie(response.data);
         setLoading(false);
-      }, 1800);
+      }, 1000);
     }
     loadMovieDetails();
   }, [id]);
 
+  /**
+   * Setting animation
+   */
+
+  useEffect(() => {
+    setTimeout(() => {
+      Animated.timing(opacityScreen, {
+        duration: 1000,
+        toValue: 1,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+  }, [opacityScreen]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContent}>
-        <View style={styles.header}>
+        <Animated.View style={[styles.header, { opacity: opacityScreen }]}>
           <TouchableOpacity onPress={() => navigation.navigate('Home')}>
             <Icon name="arrow-back" size={26} color="#1b0241" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{movie.original_title}</Text>
           <Icon name="search" size={26} color="#FFF" />
-        </View>
+        </Animated.View>
       </View>
 
       <SkeletonContent
         containerStyle={{
           flex: 1,
           alignItems: 'center',
+          useNativeDriver: false,
         }}
         isLoading={loading}
-        animationDirection="horizontalLeft"
         layout={detailSkeleton}>
-        <View style={{ marginHorizontal: 20 }}>
+        <Animated.View
+          style={[
+            { marginHorizontal: 20 },
+            { flex: 1 },
+            { opacity: opacityScreen },
+          ]}>
           <View>
             <Text style={styles.tagline}>
               {movie.tagline ? movie.tagline : movie.original_title}
@@ -180,7 +202,7 @@ export default function Detail({ route, navigation }) {
           <Text style={styles.vote}>{movie.vote_count} votes on IMDb</Text>
 
           <Text style={styles.overview}>{movie.overview}</Text>
-        </View>
+        </Animated.View>
       </SkeletonContent>
     </SafeAreaView>
   );
