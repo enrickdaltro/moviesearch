@@ -1,101 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 
 import {
-  StyleSheet,
   View,
   SafeAreaView,
   Text,
   FlatList,
   TouchableOpacity,
   Image,
+  Animated,
+  ActivityIndicator,
 } from 'react-native';
+
+import styles from './styles';
 
 import api from '../../services/api';
 
 // Setting number of columns that Flatlist will have
 const numColumns = 2;
-
-/**
- * Styles
- */
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#FFF',
-    flex: 1,
-  },
-
-  content: {
-    margin: 20,
-  },
-
-  // Header
-
-  header: {
-    height: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-
-  headerTitle: {
-    color: '#1b0241',
-    fontSize: 20,
-  },
-
-  // FlatList
-
-  list: {
-    marginHorizontal: 10,
-  },
-
-  card: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 280,
-    flex: 1,
-    shadowColor: '#999',
-    shadowOpacity: 0.3,
-    shadowOffset: {
-      height: 5,
-      width: 4,
-    },
-    shadowRadius: 4,
-    elevation: 1,
-  },
-
-  cardImage: {
-    flex: 1,
-    width: '90%',
-    resizeMode: 'contain',
-    marginHorizontal: 10,
-    marginVertical: 10,
-    borderRadius: 10,
-  },
-});
-
-/**
- * Setting Skeleton Layout
- */
-
-const flatlistLayout = [
-  {
-    width: 170,
-    height: 280,
-    marginVertical: 10,
-    marginHorizontal: 10,
-  },
-  {
-    width: 170,
-    height: 280,
-    marginVertical: 10,
-    marginHorizontal: 10,
-  },
-];
-
 /**
  * Rendered Screen
  */
@@ -103,6 +25,13 @@ const flatlistLayout = [
 export default function Home({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [movies, setMovies] = useState(false);
+
+  // Animation State
+  const [ListY] = useState(new Animated.Value(200));
+  const [OpacityListY] = useState(new Animated.Value(0));
+
+  const [HeaderY] = useState(new Animated.Value(-100));
+  const [OpacityHeaderY] = useState(new Animated.Value(0));
 
   /**
    * Setting initial data
@@ -117,52 +46,91 @@ export default function Home({ navigation }) {
       setTimeout(() => {
         setMovies(response.data.results);
         setLoading(false);
-      }, 1800);
+      }, 1000);
     }
     loadMovies();
   }, []);
 
+  /**
+   * Setting Animation
+   */
+
+  useEffect(() => {
+    // HEADER
+    setTimeout(() => {
+      Animated.timing(HeaderY, {
+        duration: 800,
+        toValue: 0,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+
+    setTimeout(() => {
+      Animated.timing(OpacityHeaderY, {
+        duration: 800,
+        toValue: 1,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+    // LIST
+    setTimeout(() => {
+      Animated.timing(ListY, {
+        duration: 800,
+        toValue: 0,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+
+    setTimeout(() => {
+      Animated.timing(OpacityListY, {
+        duration: 800,
+        toValue: 1,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+  }, [ListY, OpacityListY, OpacityHeaderY, HeaderY]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.header}>
+        <Animated.View
+          style={[
+            styles.header,
+            { top: HeaderY },
+            { opacity: OpacityHeaderY },
+          ]}>
           <Icon name="dehaze" size={24} color="#1b0241" />
           <Text style={styles.headerTitle}>Popular Movies</Text>
           <Icon name="search" size={24} color="#1b0241" />
-        </View>
+        </Animated.View>
       </View>
 
-      <SkeletonContent
-        containerStyle={{
-          flex: 1,
-
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-        }}
-        isLoading={loading}
-        animationDirection="horizontalLeft"
-        layout={flatlistLayout}>
-        <FlatList
-          style={styles.list}
-          data={movies}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={item => String(item.id)}
-          numColumns={numColumns}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigation.navigate('Detail', { item })}>
-              <Image
-                source={{
-                  uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-                }}
-                style={styles.cardImage}
-              />
-            </TouchableOpacity>
-          )}
-        />
-      </SkeletonContent>
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <Animated.View
+          style={[{ flex: 1 }, { top: ListY }, { opacity: OpacityListY }]}>
+          <FlatList
+            style={styles.list}
+            data={movies}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={item => String(item.id)}
+            numColumns={numColumns}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigation.navigate('Detail', { item })}>
+                <Image
+                  source={{
+                    uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                  }}
+                  style={styles.cardImage}
+                />
+              </TouchableOpacity>
+            )}
+          />
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 }

@@ -21,10 +21,7 @@ Icon.loadFont();
 
 const homeStack = () => {
   return (
-    <Stack.Navigator
-      options={{
-        useNativeDriver: true,
-      }}>
+    <Stack.Navigator>
       <Stack.Screen
         name="Home"
         component={Home}
